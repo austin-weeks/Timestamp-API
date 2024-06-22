@@ -18,16 +18,30 @@ app.get("/", function (req, res) {
   res.sendFile(__dirname + '/views/index.html');
 });
 
+function getDateJson(dateIn) {
+  if (!dateIn) return dateJson(new Date());
+  
+  //If input only includes digits.
+  if (! dateIn.match(/[\D]/g)) return dateJson(new Date(parseInt(dateIn)));
 
-// your first API endpoint... 
-app.get("/api/hello", function (req, res) {
-  res.json({greeting: 'hello API'});
+  dateObj = new Date(dateIn);
+  return !dateObj.getTime() ? {error: "Invalid Date"} : dateJson(dateObj);
+  
+  function dateJson(date){
+    return {
+      unix: date.getTime(),
+      utc: date.toUTCString()
+    }
+  }
+}
+
+app.get("/api/?", (req, res) => {
+  res.send(getDateJson());
 });
 
-app.get("/api", (req, res) => {
-
+app.get("/api/:date", (req, res) => {
+  res.json(getDateJson(req.params.date));
 });
-
 
 // Listen on port set in environment variable or default to 3000
 var listener = app.listen(process.env.PORT || 3000, function () {
